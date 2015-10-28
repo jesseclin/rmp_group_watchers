@@ -1,6 +1,6 @@
 # RMP Group Watchers plugin
 # Copyright (C) 2015 Kovalevsky Vasil (RMPlus company)
-# Developed by Kovalevsky Vasil by order of "vira realtime" http://rlt.ru/
+# Developed by Kovalevsky Vasil by order of "vira realtime"ï¿½http://rlt.ru/
 
 module Rmpgw
   module IssuePatch
@@ -16,7 +16,12 @@ module Rmpgw
     module InstanceMethods
       def addable_watcher_users_with_rmpgw
         users = addable_watcher_users_without_rmpgw
-        Group.order(:lastname).where(type: 'Group').limit(100).to_a + users
+
+        group_members_id = project.memberships.joins(:principal)
+                            .where(:users => {:type => 'Group', :status => Principal::STATUS_ACTIVE})
+                            .select(:user_id)
+
+        Group.where(id: group_members_id).sorted.limit(100).to_a + users
       end
 
       def watcher_user_ids_with_rmpgw=(user_ids)
