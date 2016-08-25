@@ -31,7 +31,6 @@ module Rmpgw
                          .active
                          .where("groups_users.group_id in (:user_ids) or #{User.table_name}.id in (:user_ids)", user_ids: user_ids)
                          .uniq
-                         .sorted
                          .pluck(:id)
         end
 
