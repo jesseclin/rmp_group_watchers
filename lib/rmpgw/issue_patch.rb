@@ -26,10 +26,15 @@ module Rmpgw
 
       def watcher_user_ids_with_rmpgw=(user_ids)
         if user_ids.is_a?(Array) && !user_ids.blank?
-          user_ids = user_ids.uniq
+          user_ids_uniq = user_ids.uniq
           user_ids = User.joins("LEFT JOIN groups_users on groups_users.user_id = #{User.table_name}.id")
                          .active
-                         .where("groups_users.group_id in (:user_ids) or #{User.table_name}.id in (:user_ids)", user_ids: user_ids)
+                         .where("#{User.table_name}.id in (:user_ids)", user_ids: user_ids_uniq)
+                         .uniq
+                         .pluck(:id)
+          user_ids = user_ids | User.joins("LEFT JOIN groups_users on groups_users.user_id = #{User.table_name}.id")
+                         .active
+                         .where("groups_users.group_id in (:user_ids)", user_ids: user_ids_uniq - user_ids)
                          .uniq
                          .pluck(:id)
         end
