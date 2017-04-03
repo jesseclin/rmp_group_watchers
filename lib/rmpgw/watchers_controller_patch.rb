@@ -42,7 +42,11 @@ module Rmpgw
             user_ids = params[:user_id]
           end
           params[:watcher] = {}
-          params[:watcher][:user_id] = User.joins("LEFT JOIN groups_users on groups_users.user_id = #{User.table_name}.id").active.where("groups_users.group_id in (:user_ids) or #{User.table_name}.id in (:user_ids)", user_ids: user_ids + [0]).uniq.sorted.map(&:id)
+          groups = User.joins("LEFT JOIN groups_users on groups_users.user_id = #{User.table_name}.id").active
+              .where("groups_users.group_id in (:user_ids)", user_ids: user_ids + [0])
+          users = User.joins("LEFT JOIN groups_users on groups_users.user_id = #{User.table_name}.id").active
+              .where("#{User.table_name}.id in (:user_ids)", user_ids: user_ids + [0])
+          params[:watcher][:user_id] = (groups + users).uniq.sort.map(&:id)
         end
 
         create_without_rmpgw
